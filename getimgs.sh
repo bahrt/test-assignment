@@ -84,13 +84,13 @@ if [ -z $chkfiles ]; then
 elif [ $chkfiles -eq 0 ]; then
     echo "WARNING: The provided URL does not contain any PNG files. Exiting gracefully..."
     exit 0
-elif [ $checkfiles -gt 0 ]; then
+elif [ $chkfiles -gt 0 ]; then
         $LYNX -dump -listonly -image_links -nonumbers -auth=$USERNAME:$PASSWORD "$INPUT_URL" |
         grep -Ei '\.(png)$' |
         tr '\n' '\000' |
         xargs -0 -- $WGET --http-user=$USERNAME --http-password=$PASSWORD -q --directory-prefix=$OUTPUT_PATH -- && echo "Done."
 else
-    echo "ERROR: An unexpected error happened while trying to retrieve the images."    
+    echo "ERROR: An unexpected error happened while trying to retrieve the images."
     exit 10
 fi
 
