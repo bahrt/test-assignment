@@ -31,8 +31,6 @@ usage()
 LYNX=/usr/bin/lynx
 WGET=/usr/bin/wget
 
-# Initialize creds var
-use_credentials=0
 
 # Read input parameters
 while getopts "i:o:u:p:" OPTION
