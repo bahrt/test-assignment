@@ -10,6 +10,12 @@
 #       - Redirection
 #       - SSL/TLS sites
 #
+# ToDo:
+#       - Use a separate function for error handling and logging
+#       - Look for options that do not require Lynx
+#       - Improve input validations
+#       - Improve credentials handling
+#
 
 usage()
 {
@@ -69,26 +75,24 @@ if [ ! -f "$LYNX" ]; then
         exit 3
 fi
 
-# If everything is fine, get the images
-        # Validate URL
-        $WGET --http-user=$USERNAME --http-password=$PASSWORD --spider -q $INPUT_URL; url_invalid=$?
-        if [ "$invalid_url" ]; then
-                echo "ERROR: Provided input URL is invalid."
-                exit 4
-        else
-                #Check if files exists first
-                chkfiles=0
-                chkfiles=$($LYNX -dump -listonly -image_links -nonumbers -auth=$USERNAME:$PASSWORD "$INPUT_URL" |grep -Ei '\.(png)$' | wc -l)
-                if [ $chkfiles -eq 0 ]; then
-                    echo "ERROR: No PNG images exist on specified URL. Exiting gracefully..."
-                    exit 0
-                else
-                    $LYNX -dump -listonly -image_links -nonumbers -auth=$USERNAME:$PASSWORD "$INPUT_URL" |
-                    grep -Ei '\.(png)$' |
-                    tr '\n' '\000' |
-                    xargs -0 -- $WGET --http-user=$USERNAME --http-password=$PASSWORD -q --directory-prefix=$OUTPUT_PATH -- && echo "Done."
-                fi
-       fi
+
+# Check if URL is valid and PNG files exists there
+chkfiles=$($LYNX -dump -listonly -image_links -nonumbers -auth=$USERNAME:$PASSWORD "$INPUT_URL" |grep -Ei '\.(png)$' | wc -l)
+if [ -z $chkfiles ]; then
+    echo "ERROR: Provided input URL is invalid."
+    exit 4
+elif [ $chkfiles -eq 0 ]; then
+    echo "WARNING: The provided URL does not contain any PNG files. Exiting gracefully..."
+    exit 0
+elif [ $checkfiles -gt 0 ]; then
+        $LYNX -dump -listonly -image_links -nonumbers -auth=$USERNAME:$PASSWORD "$INPUT_URL" |
+        grep -Ei '\.(png)$' |
+        tr '\n' '\000' |
+        xargs -0 -- $WGET --http-user=$USERNAME --http-password=$PASSWORD -q --directory-prefix=$OUTPUT_PATH -- && echo "Done."
+else
+    echo "ERROR: An unexpected error happened while trying to retrieve the images."    
+    exit 10
+fi
 
 # Unset credentials for security reasons
 unset $USERNAME $PASSWORD
