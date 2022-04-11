@@ -15,6 +15,7 @@
 #       - Look for options that do not require Lynx
 #       - Improve input validations
 #       - Improve credentials handling
+#       - Reduce external calls by downloading the HTML file to a local folder
 #
 
 usage()
